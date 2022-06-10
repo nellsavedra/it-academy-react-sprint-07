@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import WebPageAddons from "./components/WebPageAddons";
 
-function App() {
+const localBudget =JSON.parse( localStorage.getItem("budget"));
 
-	const [budget, setBudget] = useState({
+function App() {
+	const [budget, setBudget] = useState(localBudget ?? {
 		webpage: {
 			checked: false,
 			pages_num: 0,
@@ -29,7 +30,7 @@ function App() {
 		if (type === "button" && className === "sum") {
 			setBudget(prevBudget => ({ ...prevBudget, [parent]: { ...prevBudget[parent], [name]: prevBudget[parent][name] + 1 } }));
 		} else if (type === "button" && className === "min") {
-			setBudget(prevBudget => ({ ...prevBudget, [parent]: { ...prevBudget[parent], [name]: prevBudget[parent][name] <= 0 ? 0 : prevBudget[parent][name] - 1 } }));
+			setBudget(prevBudget => ({...prevBudget, [parent]: { ...prevBudget[parent], [name]: prevBudget[parent][name] <= 0 ? 0 : prevBudget[parent][name] - 1 } }));
 		} else {
 			setBudget(prevBudget => ({ ...prevBudget, [parent]: { ...prevBudget[parent], [name]: isNaN(parseInt(value)) ? 0 : parseInt(value) } }));
 		}
@@ -37,13 +38,14 @@ function App() {
 
 	useEffect(() => {
 		let total = 0;
-		const addons = budget.webpage.pages_num * budget.webpage.pages_langs * 30;
+		const addons = (isNaN(budget.webpage.pages_num) ? 0 : budget.webpage.pages_num) * (isNaN(budget.webpage.pages_langs) ? 0 : budget.webpage.pages_langs) * 30;
 		for (let item in budget) {
 			if (budget[item].checked === true) {
 				total += budget[item].price;
 			}
 		}
 		setGrandTotal(budget.webpage.checked ? total + addons : total);
+		localStorage.setItem("budget", JSON.stringify(budget));
 	}, [budget]);
 
 	return (
