@@ -3,6 +3,7 @@ import WebPageAddons from "./components/WebPageAddons";
 import Budget from "./classes/Budget";
 import data from "./data/data";
 import "./App.css";
+import BudgetList from "./components/BudgetList";
 
 const localBudget = JSON.parse(localStorage.getItem("budget"));
 
@@ -10,6 +11,7 @@ function App() {
 	// Inicializamos el estado principal de la aplicación, verificamos si existe en localStorage
 	const [budget, setBudget] = useState(localBudget ? new Budget({ ...localBudget }) : new Budget({ ...data }));
 	const [grandTotal, setGrandTotal] = useState(0);
+	const [budgetList, setBudgetList] = useState([]);
 	const isWebpageOpen = budget.webpage.checked;
 
 	// Funciones handler del formulario para checkboxes
@@ -23,6 +25,20 @@ function App() {
 		const { name, value } = event.target;
 		setBudget(budget.setProp("webpage", value < 1 ? "" : parseInt(value), name));
 	};
+	
+	const budgetListHandler = (budget_data) => {
+		const found = budgetList.find(e => e.budget_name === budget_data.budget_name && e.client === budget_data.client);
+		if(found) {
+			alert("Ya existe un presupuesto con ese nombre")
+			return new Array(...budgetList);
+		}
+		budget_data.date = new Date().toLocaleString('es-ES');
+		budget_data.total = grandTotal;
+		budgetList.push({...budget_data});
+		return new Array(...budgetList);
+	}
+	
+	
 
 	// Sumamos para obtener el total
 	useEffect(() => {
@@ -42,21 +58,31 @@ function App() {
 		<>
 			<form action="">
 				<p>¿Que quieres hacer?</p>
+				<p> Cliente:<br/> 
+					<input type="text" name="client" value={budget.client} onChange={event => setBudget(budget.setProp(event.target.name, event.target.value))} />
+				</p>
+				<p> Nombre del presupuesto:<br/>
+					<input type="text" name="budget_name" value={budget.budget_name} onChange={event => setBudget(budget.setProp(event.target.name, event.target.value))} />
+				</p>
 				<p>
-					<input type="checkbox" name="webpage" value={budget.webpage.price} onChange={eventCheckHandler} defaultChecked={budget.webpage.checked} />
+					<input type="checkbox" name="webpage" value={budget.webpage.price} onChange={eventCheckHandler} checked={budget.webpage.checked} />
 					Una página web (500€)
 				</p>
 				<WebPageAddons isChecked={isWebpageOpen} eventInputHandler={eventAddonsHandler} budget={isWebpageOpen ? budget : null} />
 				<p>
-					<input type="checkbox" name="seo_consult" value={budget.seo_consult.price} onChange={eventCheckHandler} defaultChecked={budget.seo_consult.checked} />
+					<input type="checkbox" name="seo_consult" value={budget.seo_consult.price} onChange={eventCheckHandler} checked={budget.seo_consult.checked} />
 					Una consultoria SEO (300€)
 				</p>
 				<p>
-					<input type="checkbox" name="ads_campaign" value={budget.ads_campaign.price} onChange={eventCheckHandler} defaultChecked={budget.ads_campaign.checked} />
+					<input type="checkbox" name="ads_campaign" value={budget.ads_campaign.price} onChange={eventCheckHandler} checked={budget.ads_campaign.checked} />
 					Una campaña de Google Ads (200€)
 				</p>
+				
+				<button type="button" onClick={() => setBudgetList(budgetListHandler(budget))}>Guardar</button>
 			</form>
 			<p>Precio: {grandTotal} €</p>
+			<hr/>
+			<BudgetList budget={budgetList}/>
 		</>
 	);
 }

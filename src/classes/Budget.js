@@ -1,13 +1,15 @@
 class Budget {
-	constructor({ webpage, seo_consult, ads_campaign }) {
+	constructor({ webpage, seo_consult, ads_campaign, client, budget_name, date}) {
 		this.webpage = webpage;
 		this.seo_consult = seo_consult;
 		this.ads_campaign = ads_campaign;
+		this.client = client;
+		this.budget_name = budget_name;
+		this.date = date;
 	}
 
 	newBudget(data) {
-		const budget = new Budget({ ...data });
-		return budget;
+		return new Budget({ ...data });
 	}
 
 	setProp(prop, value, deepProp) {

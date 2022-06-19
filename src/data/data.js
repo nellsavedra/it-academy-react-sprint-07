@@ -1,4 +1,7 @@
 const data = {
+	client: "",
+	budget_name: "",
+	date: "",
 	webpage: {
 		checked: false,
 		pages_num: 1,
