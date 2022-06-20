@@ -6,12 +6,13 @@ import "./App.css";
 import BudgetList from "./components/BudgetList";
 
 const localBudget = JSON.parse(localStorage.getItem("budget"));
+const localList = JSON.parse(localStorage.getItem("list"));
 
 function App() {
 	// Inicializamos el estado principal de la aplicación, verificamos si existe en localStorage
 	const [budget, setBudget] = useState(localBudget ? new Budget({ ...localBudget }) : new Budget({ ...data }));
 	const [grandTotal, setGrandTotal] = useState(0);
-	const [budgetList, setBudgetList] = useState([]);
+	const [budgetList, setBudgetList] = useState(localList ? [...localList] : []);
 	const isWebpageOpen = budget.webpage.checked;
 
 	// Funciones handler del formulario para checkboxes
@@ -57,7 +58,8 @@ function App() {
 		}
 		setGrandTotal(total + addons);
 		localStorage.setItem("budget", JSON.stringify(budget));
-	}, [budget, isWebpageOpen]);
+		localStorage.setItem("list", JSON.stringify(budgetList));
+	}, [budget, budgetList, isWebpageOpen]);
 
 	return (
 		<>
