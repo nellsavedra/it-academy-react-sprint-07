@@ -26,16 +26,19 @@ function App() {
 		setBudget(budget.setProp("webpage", value < 1 ? "" : parseInt(value), name));
 	};
 	
-	const budgetListHandler = (budget_data) => {
-		const found = budgetList.find(e => e.budget_name === budget_data.budget_name && e.client === budget_data.client);
-		if(found) {
-			alert("Ya existe un presupuesto con ese nombre")
-			return new Array(...budgetList);
-		}
-		budget_data.date = new Date().toLocaleString('es-ES');
+	const budgetListHandler = (event, budget_data) => {
+		event.preventDefault();
+		// const found = budgetList.find(e => e.budget_name === budget_data.budget_name && e.client === budget_data.client);
+		// if(found) {
+		// 	event.preventDefault();
+		// 	alert("Ya existe un presupuesto con ese nombre")
+		// 	return new Array(...budgetList);
+		// }
+		const date = new Date();
+		budget_data.date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
 		budget_data.total = grandTotal;
 		budgetList.push({...budget_data});
-		return new Array(...budgetList);
+		setBudgetList(new Array(...budgetList));
 	}
 	
 	
@@ -56,7 +59,7 @@ function App() {
 
 	return (
 		<>
-			<form action="">
+			<form onSubmit={event => budgetListHandler(event, budget)}>
 				<p>¿Que quieres hacer?</p>
 				<p> Cliente:<br/> 
 					<input type="text" name="client" value={budget.client} onChange={event => setBudget(budget.setProp(event.target.name, event.target.value))} />
@@ -78,11 +81,11 @@ function App() {
 					Una campaña de Google Ads (200€)
 				</p>
 				
-				<button type="button" onClick={() => setBudgetList(budgetListHandler(budget))}>Guardar</button>
+				<button type="submit" >Guardar</button>
 			</form>
 			<p>Precio: {grandTotal} €</p>
 			<hr/>
-			<BudgetList budget={budgetList}/>
+			<BudgetList budgetList={budgetList}/>
 		</>
 	);
 }
