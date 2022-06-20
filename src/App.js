@@ -26,6 +26,8 @@ function App() {
 		setBudget(budget.setProp("webpage", value < 1 ? "" : parseInt(value), name));
 	};
 	
+	
+	// To do: implement better validation
 	const budgetListHandler = (event, budget_data) => {
 		event.preventDefault();
 		// const found = budgetList.find(e => e.budget_name === budget_data.budget_name && e.client === budget_data.client);
@@ -35,10 +37,10 @@ function App() {
 		// 	return new Array(...budgetList);
 		// }
 		const date = new Date();
-		budget_data.date = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+		budget_data.date = `${date.getFullYear()}-${date.getMonth() < 10 ? "0"+(date.getMonth() + 1) : date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes() < 10 ? "0"+date.getMinutes() : date.getMinutes() }:${date.getSeconds() < 10 ? "0"+date.getSeconds() : date.getSeconds() }`;
 		budget_data.total = grandTotal;
 		budgetList.push({...budget_data});
-		setBudgetList(new Array(...budgetList));
+		setBudgetList([...budgetList]);
 	}
 	
 	
