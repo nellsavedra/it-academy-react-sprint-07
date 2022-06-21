@@ -3,7 +3,7 @@ import Popup from "./Popup";
 const WebPageAddons = ({ isChecked, eventInputHandler, budget }) => {
 	return (
 		isChecked && (
-			<>
+			<div className="addons">
 				<div>
 					<span>Número de páginas </span>
 					<button type="button" name="pages_num" value={budget.webpage.pages_num + 1} onClick={eventInputHandler}>
@@ -26,7 +26,7 @@ const WebPageAddons = ({ isChecked, eventInputHandler, budget }) => {
 					</button>
 					<Popup  value={budget.webpage.pages_langs} text="Indique el número de idiomas que necesita en el proyecto, ahora tiene:" />
 				</div>
-			</>
+			</div>
 		)
 	);
 };

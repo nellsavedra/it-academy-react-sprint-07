@@ -4,49 +4,56 @@ import Budget from "./classes/Budget";
 import data from "./data/data";
 import "./App.css";
 import BudgetList from "./components/BudgetList";
+import { useSearchParams } from "react-router-dom";
+import { cloneDeep } from "lodash";
+import useGetParams from "./helpers/useGetParams";
 
 const localBudget = JSON.parse(localStorage.getItem("budget"));
 const localList = JSON.parse(localStorage.getItem("list"));
 
 function App() {
-	// Inicializamos el estado principal de la aplicación, verificamos si existe en localStorage
-	const [budget, setBudget] = useState(localBudget ? new Budget({ ...localBudget }) : new Budget({ ...data }));
+	const params = useGetParams();
+	const [budget, setBudget] = useState(params ? new Budget({ ...params }) : localBudget ? new Budget({ ...localBudget }) : new Budget({ ...data }));
 	const [grandTotal, setGrandTotal] = useState(0);
 	const [budgetList, setBudgetList] = useState(localList ? [...localList] : []);
+	const [searchParams, setSearchParams] = useSearchParams();
+	const [search, setSearch] = useState("");
 	const isWebpageOpen = budget.webpage.checked;
 
-	// Funciones handler del formulario para checkboxes
+
 	const eventCheckHandler = event => {
 		const { name, checked } = event.target;
 		setBudget(budget.setProp(name, checked, "checked"));
+		searchParams.set(name, checked);
 	};
 
-	// Funciones handler del formulario para botones y campos de texto
+	const eventInputHandler = event => {
+		const { name, value } = event.target;
+		setBudget(budget.setProp(name, value));
+		searchParams.set(name, value);
+	};
+
 	const eventAddonsHandler = event => {
 		const { name, value } = event.target;
 		setBudget(budget.setProp("webpage", value < 1 ? "" : parseInt(value), name));
+		searchParams.set(name, value < 1 ? "" : parseInt(value), name);
 	};
-	
-	
+
 	// To do: implement better validation
 	const budgetListHandler = (event, budget_data) => {
 		event.preventDefault();
-		// const found = budgetList.find(e => e.budget_name === budget_data.budget_name && e.client === budget_data.client);
-		// if(found) {
-		// 	event.preventDefault();
-		// 	alert("Ya existe un presupuesto con ese nombre")
-		// 	return new Array(...budgetList);
-		// }
+		const found = budgetList.find(e => e.budget_name === budget_data.budget_name && e.client === budget_data.client);
+		if(found) {
+			alert("Ya existe un presupuesto con ese nombre")
+			return cloneDeep(budgetList);
+		}
 		const date = new Date();
-		budget_data.date = `${date.getFullYear()}-${date.getMonth() < 10 ? "0"+(date.getMonth() + 1) : date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes() < 10 ? "0"+date.getMinutes() : date.getMinutes() }:${date.getSeconds() < 10 ? "0"+date.getSeconds() : date.getSeconds() }`;
+		budget_data.date = `${date.getFullYear()}-${date.getMonth() < 10 ? "0" + (date.getMonth() + 1) : date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes()}:${date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds()}`;
 		budget_data.total = grandTotal;
-		budgetList.push({...budget_data});
-		setBudgetList([...budgetList]);
-	}
-	
-	
+		budgetList.unshift(cloneDeep(budget_data));
+		setBudgetList(cloneDeep(budgetList));
+	};
 
-	// Sumamos para obtener el total
 	useEffect(() => {
 		let total = 0;
 		let addons = budget.webpage.pages_num * budget.webpage.pages_langs * 30;
@@ -59,17 +66,24 @@ function App() {
 		setGrandTotal(total + addons);
 		localStorage.setItem("budget", JSON.stringify(budget));
 		localStorage.setItem("list", JSON.stringify(budgetList));
-	}, [budget, budgetList, isWebpageOpen]);
+		setSearchParams(searchParams);
+	}, [budget, budgetList, isWebpageOpen, searchParams, setSearchParams]);
 
 	return (
 		<>
 			<form onSubmit={event => budgetListHandler(event, budget)}>
 				<p>¿Que quieres hacer?</p>
-				<p> Cliente:<br/> 
-					<input type="text" name="client" value={budget.client} onChange={event => setBudget(budget.setProp(event.target.name, event.target.value))} />
+				<p>
+					{" "}
+					Cliente:
+					<br />
+					<input type="text" name="client" value={budget.client} onChange={eventInputHandler} />
 				</p>
-				<p> Nombre del presupuesto:<br/>
-					<input type="text" name="budget_name" value={budget.budget_name} onChange={event => setBudget(budget.setProp(event.target.name, event.target.value))} />
+				<p>
+					{" "}
+					Nombre del presupuesto:
+					<br />
+					<input type="text" name="budget_name" value={budget.budget_name} onChange={eventInputHandler} />
 				</p>
 				<p>
 					<input type="checkbox" name="webpage" value={budget.webpage.price} onChange={eventCheckHandler} checked={budget.webpage.checked} />
@@ -84,12 +98,14 @@ function App() {
 					<input type="checkbox" name="ads_campaign" value={budget.ads_campaign.price} onChange={eventCheckHandler} checked={budget.ads_campaign.checked} />
 					Una campaña de Google Ads (200€)
 				</p>
-				
-				<button type="submit" >Guardar</button>
+
+				<button type="submit" onClick={() => setSearch("")}>
+					Guardar
+				</button>
 			</form>
 			<p>Precio: {grandTotal} €</p>
-			<hr/>
-			<BudgetList budgetList={budgetList}/>
+			<hr />
+			<BudgetList budgetList={budgetList} searchState={[search, setSearch]} />
 		</>
 	);
 }

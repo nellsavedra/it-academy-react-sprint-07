@@ -2,10 +2,10 @@ import { orderBy } from "lodash";
 import { useState } from "react";
 import { useEffect } from "react";
 
-const BudgetList = ({ budgetList }) => {
+const BudgetList = ({ budgetList, searchState }) => {
 	const defBudget = [...budgetList];
 	const [list, setList] = useState([]);
-	const [search, setSearch] = useState("");
+	const [search, setSearch] = searchState;
 
 	useEffect(() => {
 		setList(() => [...budgetList]);
@@ -21,6 +21,7 @@ const BudgetList = ({ budgetList }) => {
 
 	const defaultSort = () => {
 		setList(() => [...defBudget]);
+		setSearch("");
 	};
 
 	const searchHandler = event => {
@@ -32,7 +33,7 @@ const BudgetList = ({ budgetList }) => {
 	return (
 		<>
 			{list.length > 0 && (
-				<div>
+				<div className="filters">
 					<span>Filters: </span>
 					<input type="text" placeholder="Buscar…" onChange={searchHandler} value={search} />
 					<button onClick={() => sortBudget()}>Ordena alfabeticamente</button>
